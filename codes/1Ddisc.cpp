@@ -22,15 +22,16 @@
 
 void setup_gas(Grid& g, CudaArray<double>& Sig_g, CudaArray<double>& u_gas, CudaArray<double>& nu, double alpha, Star& star) {
 
-    double r_c = 30*au;
+    double r_c = 35*au; // 32*au
     double Sig_0 = 0.;
-    double q = 0.5;
+    double q = 0.4; //0.25
     double p = 1.;
     double mu = 2.4;
-    double T0 = std::pow(6.25e-3 * star.L / (M_PI *au*au * sigma_SB), 0.25);
+    // double T0 = std::pow(6.25e-3 * star.L / (M_PI *au*au * sigma_SB), 0.25);
+    double T0 = 158.9;
 
     double Mtot = 0.;
-    double Mdisc = 0.07*Msun;
+    double Mdisc = 0.05*Msun; // 0.07*Msun
 
     double c_s, v_k, T;
 
@@ -109,15 +110,15 @@ void find_Rcav(Grid& g, CudaArray<double>& Sig_g, double& Rcav) {
 
 int main() {
 
-    std::filesystem::path dir = std::string("./codes/outputs/1Ddisc");
+    std::filesystem::path dir = std::string("./codes/outputs/1Ddisc_biggrain");
     std::filesystem::create_directories(dir);
     
     Grid::params p;
-    p.NR = 300;
+    p.NR = 500;
     p.Nphi = 1;
     p.Nghost = 2;
 
-    p.Rmin = 0.1*au;
+    p.Rmin = 5*au;
     p.Rmax = 1000.*au;
     p.R_spacing = RadialSpacing::log;
 
@@ -129,11 +130,11 @@ int main() {
 
     double alpha = 1.e-3;
     double rho_s = 1.25;
-    double a0 = 1.e-5;
+    double a0 = 1.e-1;
     double u_f = 1000.;
     double Rcav=0.;
 
-    double M_star = 0.7, T_star=4500., R_star = 1.7*Rsun;
+    double M_star = 1., T_star=4500., R_star = 1.7*Rsun; //M_star = 0.7
     double L_star = 4.*M_PI*sigma_SB*std::pow(T_star, 4.)*std::pow(R_star, 2.);
     Star star(GMsun*M_star, L_star, T_star);
 
@@ -156,10 +157,12 @@ int main() {
 
     calculate_ubar(g, Sig_d, Sig_g, ubar, u_g, 0, u_f, rho_s, alpha, a0, star, boundary, boundaryg);
 
-    double ts[20];
-    for (int i=0; i<20; i++) {
-        ts[i] = 1e6*year/20. * i + 1e6*year/20.;
-    }
+    double ts[14] = {10*year, 100*year, 1000*year, 1e4*year, 1e5*year, 2e5*year, 3e5*year, 4e5*year
+    , 5e5*year, 6e5*year, 7e5*year, 8e5*year, 9e5*year, 1e6*year};
+    //double ts[20];
+    //for (int i=0; i<20; i++) {
+    //    ts[i] = 1e6*year/20. * i + 1e6*year/20.;
+    //}
 
     double dt_CFL = 0.2*calc_dt(g, nu);
     std::cout << dt_CFL << "\n";

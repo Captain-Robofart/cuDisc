@@ -1,0 +1,27 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "CUDA C++: Launch",
+            "type": "cuda-gdb",
+            "request": "launch",
+            "program": "${workspaceFolder}/isoPD",
+            "miDebuggerPath": "/opt/uw/cuda/12.3.2/bin/cuda-gdb",
+            "environment": [
+                {
+                "name": "LD_LIBRARY_PATH",
+                "value": "/opt/uw/cuda/12.3.2/lib64/stubs:/opt/uw/cuda/12.3.2/lib64:/opt/uw/cuda/12.3.2/extras/Debugger/lib64:/opt/uw/cuda/12.3.2/extras/CUPTI/lib64"
+            }
+            ]
+        },
+        {
+            "name": "CUDA C++: Attach",
+            "type": "cuda-gdb",
+            "request": "attach",
+            "miDebuggerPath": "/opt/uw/cuda/12.3.2/bin/cuda-gdb"
+        }
+    ]
+}

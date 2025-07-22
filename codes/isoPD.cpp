@@ -27,10 +27,10 @@ Dynamics + Coag for a primordial disc with vertically isothermal temperature pro
 
 void set_up_gas(Grid& g, CudaArray<double>& Sig_g, CudaArray<double>& nu, Field<double>& T, Field<double>& cs, Field<double>& cs2, double alpha, Star& star) {
   
-    double r_c = 30*au;
+    double r_c = 35*au; //30*au
     double mu = 2.4;
     double Mtot = 0.;
-    double Mdisc = 0.07*Msun;
+    double Mdisc = 0.05*Msun; //0.07*Msun
 
     for (int i=0; i<g.NR+2*g.Nghost; i++) {
 
@@ -62,7 +62,7 @@ void set_up_dust(Grid& g, Field3D<Prims>& qd, Field<Prims>& wg, Field3D<double>&
             double rho_tot = 0;
             for (int k=0; k<qd.Nd; k++) {
                 // Initialise dust with MRN profile and exponential cut off at 0.1 micron
-                qd(i,j,k).rho = std::pow(sizes.centre_size(k)/sizes.centre_size(0), 0.5) * std::exp(-std::pow(sizes.centre_size(k)/1e-5, 10.));
+                qd(i,j,k).rho = std::pow(sizes.centre_size(k)/sizes.centre_size(0), 0.5) * std::exp(-std::pow(sizes.centre_size(k)/1e-5, 10.)); // change this number to whatever minimum grain size is
                 D(i,j,k) = wg(i,j).rho * (alpha * cs(i,j) * cs(i,j) / std::sqrt(GMsun/std::pow(g.Rc(i), 3.))) / Sc ;
                 rho_tot += qd(i,j,k).rho;
             }
@@ -145,34 +145,36 @@ void cs2_to_cs(Grid& g, Field<double> &cs, Field<double> &cs2) {
 
 int main() {
 
-    std::filesystem::path dir = std::string("./codes/outputs/isoPD");
+    std::filesystem::path dir = std::string("./codes/outputs/isoPD_1D");
     std::filesystem::create_directories(dir);
 
     // Set up spatial grid 
 
     Grid::params p;
-    p.NR = 100;
-    p.Nphi = 100;
+    p.NR = 500;
+    p.Nphi = 1;
     p.Nghost = 2;
 
     p.Rmin = 5.*au;
-    p.Rmax = 500.*au;
-    p.theta_min = 0. ;
-    p.theta_power = 0.75;
-    p.theta_max = M_PI/6.;
+    //p.R_power = 0.5;
+    p.Rmax = 1000.*au;
+
+    p.theta_min = -M_PI/100.;
+    //p.theta_power = 0.333;
+    p.theta_max = M_PI/100.;
 
     p.R_spacing = RadialSpacing::log ;
-    p.theta_spacing = ThetaSpacing::power;
+    p.theta_spacing = ThetaSpacing::linear;
 
     Grid g(p);
 
     // Setup a size distribution
 
-    double rho_p = 1.6;
+    double rho_p = 1.6; // Dust grain internal density
     double a0 = 1e-5 ; // Grain size lower bound in cm
-    double a1 = 10.   ;  // Grain size upper bound in cm
-    int n_spec = 7.*3.*std::log10(a1/a0) + 1;
-    double v_frag = 100.; // Fragmentation threshold
+    double a1 = 1e-5   ;  // Grain size upper bound in cm (default 10.)
+    int n_spec = 1;
+    //double v_frag = 100.; // Fragmentation threshold
 
     std::cout << "Number of dust species: "<< n_spec << "\n";
     SizeGrid sizes(a0, a1, n_spec, rho_p) ;
@@ -234,6 +236,7 @@ int main() {
 
     // Set up coagulation kernel, storing the fragmentation velocity
 
+    /*
     BirnstielKernel kernel = BirnstielKernel(g, sizes, Ws_d, Ws_g, cs, alpha2D, mu, M_star);
     kernel.set_fragmentation_threshold(v_frag);
 
@@ -247,13 +250,21 @@ int main() {
             1e-2, 1e-10
         ) ;
 
+    */
     std::cout << "Initial dust mass: " << M_dust/Msun << " M_sun\n";
 
     // Choose times to store data
     
     double t = 0, dt;
-    const int ntimes = 4;  
-    double ts[ntimes] = {10*year, 100*year, 1000*year, 1e4*year};
+    const int ntimes = 14;
+    //const double t_final = 1e6; 
+    //double ts[ntimes] = {10*year, 100*year, 1000*year, 1e4*year};
+    double ts[ntimes] = {10*year, 100*year, 1000*year, 1e4*year, 1e5*year, 2e5*year, 3e5*year, 4e5*year
+    , 5e5*year, 6e5*year, 7e5*year, 8e5*year, 9e5*year, 1e6*year};
+    //double ts[ntimes];
+    //for (int i=0; i<ntimes; i++) {
+    //    ts[i] = t_final*year/((double)ntimes) * i + t_final*year/((double)ntimes);
+    //}
 
     std::ofstream f_times((dir / "2Dtimes.txt"));
     f_times << 0. << "\n";
@@ -349,12 +360,14 @@ int main() {
 
             // Coagulation update when 1 internal coagulation time-step has passed in the global simulation time
 
+            /*
             if ((t+dt >= t_coag+dt_coag)|| (t+2*dt >= t_coag+dt_coag && dt < dt_coag) || dt == ti-t) {
                 std::cout << "Coag step at count = " << count << "\n";
                 // Run coagulation internal integration (routine calculates its own sub-steps to integrate over the timestep passed into it)
                 coagulation_integrate.integrate(g, Ws_d, Ws_g, (t+dt)-t_coag, dt_coag, floor) ;
                 t_coag = t+dt;
             } 
+            */
 
             count += 1;
             t += dt;

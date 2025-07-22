@@ -3,7 +3,7 @@
 HEADER_DIR = headers
 SRC_DIR = src
 BUILD_DIR = build
-CUDA_HOME = /usr/local/cuda-12.0
+CUDA_HOME = /opt/uw/cuda/12.3.2/
 
 CPP = g++  
 CFLAGS = -O3 -g  -std=c++17 -Wall -Wextra -march=native 

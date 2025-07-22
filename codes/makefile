@@ -1,7 +1,7 @@
 # Example makefile for compilation with cuDisc as a static library. 
 # Change lines 4 and 5 to the correct paths to both your cuda installation and cuDisc location.
 
-CUDA_HOME = /path/to/cuda-12.0
+CUDA_HOME = /usr/local/cuda-12.0
 CUDISC_HOME = /path/to/cuDisc
 
 ARCH=--generate-code arch=compute_60,code=sm_60 \
